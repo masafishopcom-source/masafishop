@@ -29,6 +29,7 @@ export interface IProduct extends Document {
     stock: number;
     sku?: string;
     image?: string;
+    images?: string[];
   }[];
   isFeatured: boolean;
   isNewArrival: boolean;
@@ -80,6 +81,7 @@ const ProductSchema: Schema<IProduct> = new Schema(
         stock: { type: Number, required: true, default: 0, min: [0, 'Stock cannot be negative'] },
         sku: { type: String },
         image: { type: String },
+        images: [{ type: String }],
       },
     ],
     isFeatured: { type: Boolean, default: false },
@@ -127,4 +129,3 @@ ProductSchema.pre('validate', function(this: any) {
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;
-

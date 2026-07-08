@@ -111,20 +111,25 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
     const hasVariants = product.variants && product.variants.length > 0;
     if (hasVariants) {
       const variantImgs = Array.from(
-        new Set((product.variants || []).map((v: any) => v.image).filter(Boolean))
+        new Set(
+          (product.variants || [])
+            .flatMap((v: any) => (v.images && v.images.length > 0) ? v.images : [v.image])
+            .filter(Boolean)
+        )
       ) as string[];
       
-      if (activeVariant?.image) {
-        const idx = variantImgs.indexOf(activeVariant.image);
+      const activeVariantImage = activeVariant?.images?.[0] || activeVariant?.image;
+      if (activeVariantImage) {
+        const idx = variantImgs.indexOf(activeVariantImage);
         if (idx > -1) {
           variantImgs.splice(idx, 1);
         }
-        variantImgs.unshift(activeVariant.image);
+        variantImgs.unshift(activeVariantImage);
       }
       return variantImgs.length > 0 ? variantImgs : (product.images || []);
     }
     return product.images || [];
-  }, [product.images, product.variants, activeVariant?.image]);
+  }, [product.images, product.variants, activeVariant]);
 
 
   // Auto-select first available options on mount or product change
@@ -218,8 +223,9 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
     }
 
     // Update main image if variant has one
-    if (activeVariant?.image) {
-      const variantImgIndex = (allImages || []).findIndex((img: string) => img === activeVariant.image);
+    const activeImg = activeVariant?.images?.[0] || activeVariant?.image;
+    if (activeImg) {
+      const variantImgIndex = (allImages || []).findIndex((img: string) => img === activeImg);
       if (variantImgIndex !== -1) {
         setSelectedImage(variantImgIndex);
       }
@@ -270,7 +276,7 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
       price: displaySalePrice || displayPrice,
       basePrice: displayPrice,
       quantity: finalQuantity,
-      image: activeVariant?.image || (product.variants && product.variants.length > 0 ? product.variants[0]?.image : product.images?.[0]),
+      image: activeVariant?.images?.[0] || activeVariant?.image || (product.variants && product.variants.length > 0 ? (product.variants[0]?.images?.[0] || product.variants[0]?.image) : product.images?.[0]),
       color: selectedColor || undefined,
       size: selectedSize || undefined
     }));
@@ -625,20 +631,47 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
                       ?.filter((v: any) => v.color === color)
                       .every((v: any) => (v.stock || 0) <= 0);
 
+                    // Find variant that matches this color and has an image
+                    const variantWithImage = product.variants?.find(
+                      (v: any) => v.color === color && (v.image || (v.images && v.images.length > 0))
+                    );
+                    const imageUrl = variantWithImage?.images?.[0] || variantWithImage?.image;
+
                     return (
                       <button
                         key={color}
                         disabled={isOutOfStock}
                         onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 text-xs font-bold transition-all border ${selectedColor === color
-                            ? 'bg-primary/5 border-primary text-primary shadow-sm'
+                        title={color}
+                        className={`relative rounded-lg overflow-hidden transition-all duration-200 border-2 ${
+                          selectedColor === color
+                            ? 'border-primary ring-2 ring-primary/20 scale-105 shadow-md'
                             : isOutOfStock
-                              ? 'bg-muted/30 border-dashed text-muted-foreground/50 cursor-not-allowed'
-                              : 'border-muted-foreground/20 text-muted-foreground hover:border-primary/50'
-                          }`}
+                              ? 'border-dashed border-muted bg-muted/20 opacity-40 cursor-not-allowed'
+                              : 'border-muted hover:border-primary/50 hover:scale-102'
+                        } ${imageUrl ? 'p-0.5 w-14 h-14' : 'px-4 py-2 text-xs font-bold'}`}
                       >
-                        {color}
-                        {isOutOfStock && <span className="block text-[8px] mt-0.5 opacity-50">Sold Out</span>}
+                        {imageUrl ? (
+                          <div className="relative w-full h-full rounded-md overflow-hidden bg-white">
+                            <Image
+                              src={imageUrl}
+                              alt={color}
+                              fill
+                              sizes="56px"
+                              className="object-contain p-0.5"
+                            />
+                            {isOutOfStock && (
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <span className="text-[8px] font-black uppercase text-white tracking-tighter">Out</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            {color}
+                            {isOutOfStock && <span className="block text-[8px] mt-0.5 opacity-50">Sold Out</span>}
+                          </>
+                        )}
                       </button>
                     );
                   })}
