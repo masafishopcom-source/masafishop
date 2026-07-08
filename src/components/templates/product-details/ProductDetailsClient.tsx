@@ -68,8 +68,9 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
   const [selectedImage, setSelectedImage] = useState(0);
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0, percentageX: 0, percentageY: 0 });
   const [showZoom, setShowZoom] = useState(false);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const defaultVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+  const [selectedColor, setSelectedColor] = useState<string | null>(defaultVariant?.color || null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(defaultVariant?.size || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [eligibility, setEligibility] = useState<any>(null);
@@ -105,6 +106,26 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
     ),
     [product.variants, selectedColor, selectedSize]
   );
+
+  const allImages = useMemo(() => {
+    const hasVariants = product.variants && product.variants.length > 0;
+    if (hasVariants) {
+      const variantImgs = Array.from(
+        new Set((product.variants || []).map((v: any) => v.image).filter(Boolean))
+      ) as string[];
+      
+      if (activeVariant?.image) {
+        const idx = variantImgs.indexOf(activeVariant.image);
+        if (idx > -1) {
+          variantImgs.splice(idx, 1);
+        }
+        variantImgs.unshift(activeVariant.image);
+      }
+      return variantImgs.length > 0 ? variantImgs : (product.images || []);
+    }
+    return product.images || [];
+  }, [product.images, product.variants, activeVariant?.image]);
+
 
   // Auto-select first available options on mount or product change
   useEffect(() => {
@@ -198,24 +219,20 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
 
     // Update main image if variant has one
     if (activeVariant?.image) {
-      const variantImgIndex = (product.images || []).findIndex((img: string) => img === activeVariant.image);
+      const variantImgIndex = (allImages || []).findIndex((img: string) => img === activeVariant.image);
       if (variantImgIndex !== -1) {
         setSelectedImage(variantImgIndex);
       }
     }
-  }, [selectedColor, selectedSize, availableSizes, activeVariant, product.images]);
+  }, [selectedColor, selectedSize, availableSizes, activeVariant, allImages]);
 
-  const displayPrice = activeVariant?.price || product.price;
-  const displaySalePrice = activeVariant?.salePrice || product.salePrice;
   const hasVariants = (uniqueColors.length > 0 || uniqueSizes.length > 0);
+  const currentVariant = activeVariant || defaultVariant;
 
-  // Strict stock calculation: If product has variants, stock MUST come from the active variant.
-  // We only fallback to product.stock if the product truly has no variants at all.
-  const displayStock = hasVariants
-    ? (activeVariant ? (activeVariant.stock ?? 0) : 0)
-    : (product.stock ?? 0);
-
-  const displaySku = activeVariant?.sku || product.sku;
+  const displayPrice = hasVariants ? (currentVariant?.price ?? 0) : product.price;
+  const displaySalePrice = hasVariants ? currentVariant?.salePrice : product.salePrice;
+  const displayStock = hasVariants ? (currentVariant?.stock ?? 0) : (product.stock ?? 0);
+  const displaySku = hasVariants ? (currentVariant?.sku ?? '') : product.sku;
 
   // Debug log for troubleshooting stock discrepancies
   useEffect(() => {
@@ -253,7 +270,7 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
       price: displaySalePrice || displayPrice,
       basePrice: displayPrice,
       quantity: finalQuantity,
-      image: activeVariant?.image || product.images?.[0],
+      image: activeVariant?.image || (product.variants && product.variants.length > 0 ? product.variants[0]?.image : product.images?.[0]),
       color: selectedColor || undefined,
       size: selectedSize || undefined
     }));
@@ -425,10 +442,10 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
             onMouseEnter={() => setShowZoom(true)}
             onMouseLeave={() => setShowZoom(false)}
           >
-            {product.images && product.images.length > 0 && selectedImage < product.images.length ? (
+            {allImages && allImages.length > 0 && selectedImage < allImages.length ? (
               <>
                 <Image
-                  src={product.images[selectedImage]}
+                  src={allImages[selectedImage]}
                   alt={product.name}
                   width={400}
                   height={400}
@@ -467,14 +484,14 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
 
           {/* External Zoom Preview Window - Daraz Style */}
           {/* Placed outside the overflow-hidden container so it can overlay the right column */}
-          {showZoom && product.images && product.images.length > 0 && product.images[selectedImage] && (
+          {showZoom && allImages && allImages.length > 0 && allImages[selectedImage] && (
             <div
               className="absolute left-full ml-10 top-0 w-[120%] h-full border-2 border-primary/20 rounded-2xl bg-white shadow-2xl z-50 pointer-events-none overflow-hidden hidden lg:block animate-in fade-in zoom-in-95 duration-200"
             >
               <div
                 className="w-full h-full bg-no-repeat"
                 style={{
-                  backgroundImage: `url(${product.images[selectedImage]})`,
+                  backgroundImage: `url(${allImages[selectedImage]})`,
                   backgroundSize: '300%', // Zoom level
                   backgroundPosition: `${zoomPos.percentageX}% ${zoomPos.percentageY}%`,
                 }}
@@ -489,7 +506,7 @@ export default function ProductDetailsClient({ product }: ProductDetailsClientPr
         </div>
 
         <div className="flex gap-4 overflow-auto pb-2 scrollbar-none">
-          {product.images?.map((img: string, i: number) => (
+          {allImages?.map((img: string, i: number) => (
             <button
               key={i}
               className={`relative h-20 w-20 flex-shrink-0 rounded-md border-2 overflow-hidden transition-all ${selectedImage === i ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-muted hover:border-primary/50'
