@@ -283,6 +283,8 @@ function CheckoutContent() {
       fbEvent('InitiateCheckout', checkoutPayload, initiateUserData);
       ttEvent('InitiateCheckout', checkoutPayload, initiateUserData);
     });
+  }, [isHydrated, items, totalAmount, profile?.email]);
+
   // Debounced sync of checkout info for abandoned carts tracking
   const watchedFullName = form.watch('fullName');
   const watchedPhone = form.watch('phone');
