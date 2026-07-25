@@ -22,12 +22,23 @@ export async function GET() {
         "bodyFont": "inter"
     };
 
-    // Update the latest settings document
-    const result = await GlobalSettings.findOneAndUpdate(
-        {}, 
-        { uiTemplates: ui_templates, updatedAt: new Date() },
-        { sort: { updatedAt: -1 }, new: true, upsert: true }
-    );
+    // First, find if there are any settings at all
+    let result = await GlobalSettings.findOne().sort({ updatedAt: -1 });
+    
+    if (result) {
+        // Update existing
+        result.uiTemplates = ui_templates;
+        result.updatedAt = new Date();
+        await result.save();
+    } else {
+        // Create new
+        result = await GlobalSettings.create({
+            brandName: "Masafishop",
+            uiTemplates: ui_templates,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+    }
 
     return NextResponse.json({ 
         message: "Successfully updated uiTemplates", 
