@@ -89,6 +89,11 @@ const settingsSchema = z.object({
     logoFont: z.string().default('orbitron'),
     bodyFont: z.string().default('inter'),
     layout: z.string().default('v1'),
+    hero: z.string().default('v2'),
+    categories: z.string().default('v1'),
+    productCard: z.string().default('v6'),
+    navbar: z.string().default('v1'),
+    footer: z.string().default('v1'),
   }).optional(),
   paymentConfig: z.object({
     activeMethod: z.string().default('none'),
@@ -250,6 +255,11 @@ export default function SettingsPage() {
                   logoFont: result.data.uiTemplates?.logoFont || 'orbitron',
                   bodyFont: result.data.uiTemplates?.bodyFont || 'inter',
                   layout: result.data.uiTemplates?.layout || 'v1',
+                  hero: result.data.uiTemplates?.hero || 'v2',
+                  categories: result.data.uiTemplates?.categories || 'v1',
+                  productCard: result.data.uiTemplates?.productCard || 'v6',
+                  navbar: result.data.uiTemplates?.navbar || 'v1',
+                  footer: result.data.uiTemplates?.footer || 'v1',
                 },
                 paymentConfig: {
                   activeMethod: result.data.paymentConfig?.activeMethod || 'none',
