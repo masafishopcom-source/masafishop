@@ -175,9 +175,9 @@ async function getHomeData() {
 export default async function Home() {
   const data = await getHomeData();
   const ui = {
-    hero: data.settings?.uiTemplates?.hero || 'v1',
+    hero: data.settings?.uiTemplates?.hero || 'v2',
     categories: data.settings?.uiTemplates?.categories || 'v1',
-    productCard: data.settings?.uiTemplates?.productCard || 'v1'
+    productCard: data.settings?.uiTemplates?.productCard || 'v6'
   };
 
   const orgSchema = data.settings ? await generateOrganizationSchema(data.settings) : null;

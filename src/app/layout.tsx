@@ -260,8 +260,8 @@ export default async function RootLayout({
   const isValidGAId = (id?: string) => id ? /^(G-[A-Z0-9]+|UA-[0-9-]+)$/i.test(id) : false;
   const gaId = settings?.googleAnalyticsId;
 
-  const theme = settings?.uiTemplates?.theme;
-  const themeClass = (theme && theme !== 'default') ? `theme-${theme.toLowerCase()}` : '';
+  const theme = settings?.uiTemplates?.theme || 'green';
+  const themeClass = (theme && theme !== 'default') ? `theme-${theme.toLowerCase()}` : 'theme-green';
 
   const bodyFont = settings?.uiTemplates?.bodyFont || 'inter';
   const logoFont = settings?.uiTemplates?.logoFont || 'orbitron';
