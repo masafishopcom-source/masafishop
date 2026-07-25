@@ -22,14 +22,17 @@ export async function GET() {
         "bodyFont": "inter"
     };
 
-    // First, find if there are any settings at all
+    // Mongoose by default pluralizes the model name: GlobalSettings -> globalsettings
+    // Let's use the model directly as it's already connected
     let result = await GlobalSettings.findOne().sort({ updatedAt: -1 });
     
     if (result) {
         // Update existing
         result.uiTemplates = ui_templates;
         result.updatedAt = new Date();
-        await result.save();
+        // Use markModified if it's a mixed type or nested
+        result.markModified('uiTemplates');
+        await result.save({ validateBeforeSave: false });
     } else {
         // Create new
         result = await GlobalSettings.create({
