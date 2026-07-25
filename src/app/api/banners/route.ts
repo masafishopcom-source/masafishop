@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
       image: body.image,
       link: body.link,
       description: body.description,
+      primaryBtnText: body.primaryBtnText,
+      primaryBtnLink: body.primaryBtnLink,
+      secondaryBtnText: body.secondaryBtnText,
+      secondaryBtnLink: body.secondaryBtnLink,
       order: body.order ?? 0,
       isActive: body.isActive !== undefined ? body.isActive : true,
     };
