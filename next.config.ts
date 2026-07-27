@@ -42,6 +42,9 @@ const nextConfig: NextConfig = {
     ],
     qualities: [75, 80, 100],
   },
+  env: {
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
