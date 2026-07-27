@@ -54,6 +54,13 @@ export default function AdminSidebar() {
             CMS Manager
           </Link>
           <Link
+            href="/admin/system-design"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+          >
+            <Monitor className="h-4 w-4" />
+            Homepage Customization
+          </Link>
+          <Link
             href="/admin/landing-pages"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
           >
