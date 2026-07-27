@@ -1,8 +1,8 @@
 /**
- * Utility for uploading images to imgBB.
- * Requires NEXT_PUBLIC_IMGBB_API_KEY in .env.local
+ * Utility for uploading images via the local API route.
+ * The API route handles the actual upload to Cloudinary.
  */
-export async function uploadToImgBB(file: File | string): Promise<string> {
+export async function uploadImage(file: File | string): Promise<string> {
   const formData = new FormData();
   
   if (typeof file === 'string') {
@@ -39,3 +39,5 @@ export async function uploadToImgBB(file: File | string): Promise<string> {
   }
 }
 
+// Keep the old name for backward compatibility if needed elsewhere
+export const uploadToImgBB = uploadImage;
