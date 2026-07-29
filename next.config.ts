@@ -44,6 +44,7 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {

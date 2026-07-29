@@ -3,10 +3,15 @@ import { auth } from '@/auth';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
+// Note: Secrets are managed via Vercel environment variables for security.
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'pqvdu6bo',
-  api_key: process.env.CLOUDINARY_API_KEY || '472283955514275',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'e8BLOz-2YWdD3lyQEaLLyQ2WT3o',
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
 });
 
 export async function POST(req: NextRequest) {
@@ -16,6 +21,12 @@ export async function POST(req: NextRequest) {
     // Auth check - any authenticated user can upload images
     if (!session || !session.user) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if Cloudinary is configured
+    if (!cloudName || !apiKey || !apiSecret) {
+        console.error('Cloudinary configuration missing:', { cloudName: !!cloudName, apiKey: !!apiKey, apiSecret: !!apiSecret });
+        return NextResponse.json({ message: 'Image upload service is not configured correctly on the server' }, { status: 500 });
     }
 
     const formData = await req.formData();
