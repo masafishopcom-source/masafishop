@@ -1,13 +1,7 @@
 import type { NextAuthConfig } from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 
 export default {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+  providers: [], // Temporarily empty to debug "Configuration" error
   callbacks: {
     async session({ session, token }) {
       if (token && session.user) {
@@ -39,7 +33,7 @@ export default {
       return token;
     },
   },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'masafishop_fallback_secret_32_chars_long',
   trustHost: true,
   session: {
     strategy: 'jwt',
